@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src https://script.google.com https://script.googleusercontent.com">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#2B2170" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#34298A" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gastos">
+<meta name="format-detection" content="telephone=no">
+<title>Gastos</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+<style>
+:root {
+  --surface: #FFFFFF;
+  --surface-2: #F1EFF9;
+  --ink: #1E1B3A;
+  --ink-2: #56527A;
+  --line: #E3E0F0;
+  --hero: #2B2170;
+  --hero-ink: #FFFFFF;
+  --hero-ink-2: rgba(255, 255, 255, 0.84);
+  --data: #5B3FD1;
+  --good: #1F8A5B;
+  --warning: #D9730D;
+  --critical: #C4314B;
+  --font-text: "Avenir Next", Avenir, "Segoe UI Variable", "Nunito Sans", system-ui, sans-serif;
+  --font-figures: "Avenir Next Condensed", "Avenir Next", "Roboto Condensed", system-ui, sans-serif;
+  --tabbar-height: 60px;
+  --gutter: 20px;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #1D1A33;
+    --surface-2: #2A2647;
+    --ink: #F2F0FB;
+    --ink-2: #B8B3D6;
+    --line: #3A3560;
+    --hero: #34298A;
+    --data: #8470EE;
+    --good: #2BA36E;
+    --warning: #C9831A;
+    --critical: #E0508A;
+  }
+}
+@media (max-width: 359px) { :root { --gutter: 16px; } }
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; background: var(--surface); }
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 16px;
+  line-height: 1.45;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+[hidden] { display: none !important; }
+h1, h2, h3, p, ul, ol { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+button, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; padding: 0; }
+button:disabled { cursor: default; }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--data); outline-offset: 2px; border-radius: 6px; }
+.figure { font-family: var(--font-figures); font-variant-numeric: tabular-nums; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; }
+.wrap { max-width: 560px; margin: 0 auto; padding: 0 max(var(--gutter), env(safe-area-inset-right)) 0 max(var(--gutter), env(safe-area-inset-left)); }
+.secondary { color: var(--ink-2); font-size: 14px; }
+
+/* ---------- Violet panel (the one bold element) ---------- */
+.hero {
+  background: var(--hero);
+  color: var(--hero-ink);
+  padding-top: env(safe-area-inset-top);
+}
+.hero :focus-visible { outline-color: var(--hero-ink); }
+.topbar { display: flex; align-items: center; gap: 2px; min-height: 56px; margin: 0 -10px; }
+.topbar .cycle-nav { display: flex; align-items: center; min-width: 0; flex: 1 1 auto; }
+.cycle-label { font-size: 17px; font-weight: 600; white-space: nowrap; padding: 0 2px; }
+.icon-button {
+  width: 44px; height: 44px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 22px;
+}
+.icon-button svg { width: 24px; height: 24px; }
+.icon-button:disabled { opacity: 0.35; }
+.hero .icon-button:not(:disabled):active { background: rgba(255, 255, 255, 0.14); }
+.updated { font-size: 14px; color: var(--hero-ink-2); min-height: 20px; }
+.headline { padding: 18px 0 30px; }
+.headline p { font-size: 30px; line-height: 1.15; font-weight: 600; letter-spacing: -0.01em; overflow-wrap: break-word; }
+.headline p + p { margin-top: 10px; }
+@media (max-width: 359px) { .headline p { font-size: 26px; } }
+.hero-compact .headline { display: none; }
+.hero-compact .updated { padding-bottom: 14px; }
+
+/* ---------- Notices (demo, offline) ---------- */
+.notice { border-bottom: 1px solid var(--line); }
+.notice .wrap { display: flex; align-items: center; gap: 10px; min-height: 52px; padding-top: 4px; padding-bottom: 4px; }
+.notice p { flex: 1; font-size: 14px; color: var(--ink-2); }
+.text-button {
+  min-height: 44px; padding: 0 12px; margin-right: -12px;
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; text-decoration-thickness: 2px;
+  border-radius: 8px; flex: none;
+}
+
+/* ---------- Status glyphs ---------- */
+.glyph { width: 20px; height: 20px; flex: none; }
+.glyph .bg { fill: var(--ink-2); }
+.glyph.good .bg { fill: var(--good); }
+.glyph.warn .bg { fill: var(--warning); }
+.glyph.bad .bg { fill: var(--critical); }
+.glyph .mark { stroke: #FFFFFF; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.glyph .dot { fill: #FFFFFF; }
+
+/* ---------- Views ---------- */
+main { padding-bottom: calc(var(--tabbar-height) + env(safe-area-inset-bottom) + 32px); }
+.view > section, .view > .block { padding-top: 28px; }
+h2 { font-size: 19px; line-height: 1.3; font-weight: 600; }
+.section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
+
+/* Overall meter */
+.meter { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: 14px; row-gap: 6px; }
+.track { position: relative; height: 12px; background: var(--surface-2); border-radius: 6px; }
+.fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--data); border-radius: 6px; }
+.limit-tick { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; background: var(--ink); border-radius: 1px; }
+.meter .pct { font-family: var(--font-figures); font-size: 20px; font-weight: 600; min-width: 3ch; text-align: right; }
+.meter .secondary { grid-column: 1 / -1; }
+
+/* Day-by-day chart */
+.chart { position: relative; margin-top: 10px; touch-action: pan-y; }
+.chart svg { display: block; width: 100%; overflow: visible; }
+.chart .column { fill: var(--data); }
+.chart .day-bg { fill: transparent; }
+.chart .day.active .day-bg { fill: var(--surface-2); }
+.chart .hit { fill: transparent; cursor: pointer; }
+.chart .hit:focus { outline: none; }
+.chart .hit:focus-visible { stroke: var(--data); stroke-width: 2px; }
+.chart .axis { stroke: var(--line); stroke-width: 1; shape-rendering: crispEdges; }
+.chart .today-tick { stroke: var(--ink-2); stroke-width: 1; shape-rendering: crispEdges; }
+.chart text { font-family: var(--font-figures); font-variant-numeric: tabular-nums; font-size: 13px; fill: var(--ink-2); }
+.chart text.value { fill: var(--ink); font-weight: 600; }
+.chart.has-tooltip text.value { visibility: hidden; }
+.chart text.today { fill: var(--ink); font-weight: 600; }
+.chart-empty { position: absolute; left: 0; right: 0; top: 40%; text-align: center; color: var(--ink-2); font-size: 14px; }
+.tooltip {
+  position: absolute; z-index: 5; pointer-events: none;
+  min-width: 150px; max-width: 240px;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 10px;
+  padding: 10px 12px; font-size: 14px; line-height: 1.35;
+}
+.tooltip .tt-value { font-family: var(--font-figures); font-size: 18px; font-weight: 600; }
+.tooltip .tt-date { color: var(--ink-2); }
+.tooltip ul { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
+.tooltip li { display: flex; justify-content: space-between; gap: 10px; }
+.tooltip li span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.tooltip li span:last-child { font-family: var(--font-figures); font-variant-numeric: tabular-nums; flex: none; }
+.tooltip .tt-more { color: var(--ink-2); display: block; }
+
+.day-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 15px; }
+.day-table th { text-align: left; font-weight: 600; font-size: 14px; color: var(--ink-2); padding: 8px 0; border-bottom: 1px solid var(--line); }
+.day-table th:last-child, .day-table td:last-child { text-align: right; }
+.day-table td { padding: 9px 0; border-bottom: 1px solid var(--line); }
+.day-table td:last-child { font-family: var(--font-figures); font-variant-numeric: tabular-nums; }
+.day-table tr.zero td { color: var(--ink-2); }
+.day-table tr.is-today td:first-child { font-weight: 600; }
+
+/* Insights */
+.insights { margin-top: 6px; }
+.insights li { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.insights li:last-child { border-bottom: 0; }
+.insights .glyph { margin-top: 2px; }
+
+/* ---------- Categories ---------- */
+.group + .group { margin-top: 8px; }
+.group h2 { padding-bottom: 4px; }
+.group .group-note { margin-top: 2px; }
+.rows { margin-top: 8px; border-top: 1px solid var(--line); }
+.row { border-bottom: 1px solid var(--line); }
+.row-button {
+  display: block; width: 100%; text-align: left;
+  padding: 14px 0 12px; min-height: 44px;
+}
+.row-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 12px; }
+.row-name { font-weight: 600; min-width: 0; flex: 1 1 8em; overflow-wrap: break-word; }
+.row-name .detail { white-space: nowrap; font-weight: 400; color: var(--ink-2); font-size: 14px; }
+.row-figure { flex: none; margin-left: auto; font-family: var(--font-figures); font-variant-numeric: tabular-nums; font-size: 15px; color: var(--ink); text-align: right; }
+.row-figure .of { color: var(--ink-2); }
+.row .track { height: 8px; border-radius: 4px; margin-top: 10px; }
+.row .fill { border-radius: 4px; }
+.row-status { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 14px; color: var(--ink-2); }
+.row-status .glyph { width: 18px; height: 18px; }
+.row-status .chevron { margin-left: auto; width: 20px; height: 20px; color: var(--ink-2); transition: transform 0.18s ease; }
+.row-button[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+.row-transactions { padding: 0 0 12px; animation: expand 0.18s ease; }
+.row-transactions .empty { padding: 8px 0; }
+@keyframes expand { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Transactions ---------- */
+.filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.filter-chip {
+  min-height: 44px; padding: 0 16px; border-radius: 22px;
+  background: var(--surface); border: 1px solid var(--line); font-size: 15px; color: var(--ink);
+}
+.filter-chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); font-weight: 600; }
+.day-group { margin-top: 22px; }
+.day-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.day-head h3 { font-size: 16px; font-weight: 600; }
+.day-head .figure { color: var(--ink-2); font-size: 15px; }
+.tx { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.tx-line1 { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.tx-merchant { min-width: 0; flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tx-amount { flex: none; font-family: var(--font-figures); font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 600; text-align: right; }
+.tx-line2 { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin-top: 4px; font-size: 14px; color: var(--ink-2); }
+.chip { display: inline-block; max-width: 100%; padding: 1px 10px; border-radius: 12px; background: var(--surface-2); color: var(--ink); font-size: 13px; line-height: 22px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tx-meta { min-width: 0; overflow-wrap: anywhere; }
+.tx.excluded .tx-merchant, .tx.excluded .tx-amount { color: var(--ink-2); font-weight: 400; }
+.tx.excluded .tx-amount { text-decoration: line-through; text-decoration-color: var(--ink-2); }
+.not-counted { font-size: 13px; color: var(--ink-2); border: 1px solid var(--line); border-radius: 12px; padding: 0 9px; line-height: 22px; }
+.row-transactions .tx:last-child { border-bottom: 0; }
+
+/* ---------- Empty and error states ---------- */
+.state { padding-top: 28px; }
+.state p + p, .state p + .button { margin-top: 12px; }
+.button {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 48px; padding: 0 22px; border-radius: 24px;
+  font-size: 16px; font-weight: 600;
+}
+.button-primary { background: var(--hero); color: #FFFFFF; }
+.button-primary:disabled { opacity: 0.6; }
+.button-quiet { border: 1px solid var(--line); color: var(--ink); background: var(--surface); }
+
+/* ---------- Tab bar ---------- */
+.tabs {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  background: var(--surface-2);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabs .wrap { display: flex; padding-left: max(4px, env(safe-area-inset-left)); padding-right: max(4px, env(safe-area-inset-right)); }
+.tab {
+  flex: 1 1 0; min-width: 0; min-height: var(--tabbar-height);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  color: var(--ink-2); font-size: 13px; line-height: 1.2;
+}
+.tab svg { width: 24px; height: 24px; }
+.tab[aria-selected="true"] { color: var(--ink); font-weight: 600; }
+.tab[aria-selected="true"] svg { color: var(--data); }
+
+/* ---------- Setup screen ---------- */
+.setup .headline { padding-bottom: 34px; }
+.setup .app-name { display: flex; align-items: center; min-height: 56px; font-size: 17px; font-weight: 600; }
+.code-form { padding-top: 28px; padding-bottom: 40px; }
+.code-form label { display: block; font-weight: 600; margin-bottom: 8px; }
+.code-form textarea {
+  display: block; width: 100%; min-height: 112px; resize: vertical;
+  padding: 12px 14px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--surface-2); color: var(--ink);
+  font-size: 16px; line-height: 1.4; word-break: break-all;
+}
+.code-form textarea:focus-visible { outline: 2px solid var(--data); outline-offset: 1px; }
+.error-message { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; }
+.error-message .glyph { margin-top: 2px; }
+.actions { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.actions .button { width: 100%; }
+
+/* ---------- Settings sheet ---------- */
+dialog.sheet {
+  margin: auto auto 0; padding: 0; border: 0;
+  width: 100%; max-width: 560px; max-height: 85vh;
+  border-radius: 18px 18px 0 0;
+  background: var(--surface); color: var(--ink);
+}
+dialog.sheet::backdrop { background: rgba(20, 16, 45, 0.45); }
+dialog.sheet[open] { animation: slide-up 0.2s ease; }
+@keyframes slide-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.sheet-body { padding: 8px var(--gutter) calc(24px + env(safe-area-inset-bottom)); }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; min-height: 56px; }
+.sheet-head .text-button { margin-right: -12px; }
+.options { border-top: 1px solid var(--line); }
+.option { display: flex; width: 100%; align-items: center; min-height: 52px; text-align: left; border-bottom: 1px solid var(--line); font-size: 16px; }
+.install { margin-top: 20px; }
+.install h3 { font-size: 16px; font-weight: 600; }
+.install p { margin-top: 4px; color: var(--ink-2); font-size: 15px; }
+.version { margin-top: 20px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+@media (forced-colors: active) {
+  .fill, .chart .column { forced-color-adjust: none; background: CanvasText; fill: CanvasText; }
+}
+</style>
+</head>
+<body>
+<noscript><p style="padding:20px">Gastos necesita JavaScript.</p></noscript>
+
+<!-- Setup: paste the access code -->
+<div id="setup" class="setup" hidden>
+  <div class="hero">
+    <div class="wrap">
+      <h1 class="app-name">Gastos</h1>
+      <div class="headline"><p>Pega el código de acceso para ver cómo van los gastos.</p></div>
+    </div>
+  </div>
+  <form id="code-form" class="wrap code-form" novalidate>
+    <label for="access-code">Código de acceso</label>
+    <textarea id="access-code" name="access-code" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-describedby="code-error"></textarea>
+    <div id="code-error" class="error-message" role="alert" hidden></div>
+    <div class="actions">
+      <button type="submit" id="enter-button" class="button button-primary">Entrar</button>
+      <button type="button" id="demo-button" class="button button-quiet">Ver una demo</button>
+    </div>
+  </form>
+</div>
+
+<!-- The app -->
+<div id="main-app" hidden>
+  <header id="hero" class="hero">
+    <div class="wrap">
+      <div class="topbar">
+        <div class="cycle-nav">
+          <button type="button" class="icon-button" id="prev-cycle" aria-label="Ciclo anterior">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6 8.5 12l6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <h1 class="cycle-label" id="cycle-label" aria-live="polite">&nbsp;</h1>
+          <button type="button" class="icon-button" id="next-cycle" aria-label="Ciclo siguiente">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <button type="button" class="icon-button" id="refresh-button" aria-label="Actualizar">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v4h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button type="button" class="icon-button" id="settings-button" aria-label="Ajustes" aria-haspopup="dialog">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/><circle cx="12" cy="12" r="6.6"/></g></svg>
+        </button>
+      </div>
+      <p class="updated" id="updated" aria-live="polite"></p>
+      <div class="headline" id="headline" aria-live="polite"></div>
+    </div>
+  </header>
+
+  <div id="notices"></div>
+
+  <main id="content">
+    <div class="wrap">
+      <div id="view-summary" class="view" role="tabpanel" aria-labelledby="tab-summary"></div>
+      <div id="view-categories" class="view" role="tabpanel" aria-labelledby="tab-categories" hidden></div>
+      <div id="view-transactions" class="view" role="tabpanel" aria-labelledby="tab-transactions" hidden></div>
+    </div>
+  </main>
+
+  <nav class="tabs" aria-label="Secciones">
+    <div class="wrap" role="tablist">
+      <button type="button" class="tab" role="tab" id="tab-summary" data-view="summary" aria-selected="true" aria-controls="view-summary">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M5 6.5h14M5 11h14M5 15.5h9"/><path d="M5 20h6"/></g></svg>
+        <span>Resumen</span>
+      </button>
+      <button type="button" class="tab" role="tab" id="tab-categories" data-view="categories" aria-selected="false" aria-controls="view-categories" tabindex="-1">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16" opacity=".35"/><path d="M4 6h11M4 12h16M4 18h6"/></g></svg>
+        <span>Categorías</span>
+      </button>
+      <button type="button" class="tab" role="tab" id="tab-transactions" data-view="transactions" aria-selected="false" aria-controls="view-transactions" tabindex="-1">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/></g></svg>
+        <span>Movimientos</span>
+      </button>
+    </div>
+  </nav>
+</div>
+
+<!-- Settings -->
+<dialog id="settings" class="sheet" aria-labelledby="settings-title">
+  <div class="sheet-body">
+    <div class="sheet-head">
+      <h2 id="settings-title">Ajustes</h2>
+      <button type="button" class="text-button" id="close-settings">Cerrar</button>
+    </div>
+    <div class="options">
+      <button type="button" class="option" id="option-code">Cambiar el código de acceso</button>
+      <button type="button" class="option" id="option-demo">Ver la demo</button>
+    </div>
+    <div class="install" id="install-help">
+      <h3>Tenerla en el iPhone</h3>
+      <p>En Safari, toca Compartir, luego Añadir a pantalla de inicio.</p>
+    </div>
+    <p class="version secondary" id="version">Versión</p>
+  </div>
+</dialog>
+
+<script src="logic.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
